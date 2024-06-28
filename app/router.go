@@ -41,7 +41,7 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// No path matches
-	w.Write([]byte(NOT_FOUND_RESPONSE))
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func (rtr *Router) Route(method string, path string, handlerFunc http.HandlerFunc) {

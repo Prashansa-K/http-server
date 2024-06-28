@@ -11,7 +11,7 @@ func main() {
 		w.Write([]byte(OK_RESPONSE + CRLF))
 	})
 
-	router.Route("GET", `/echo/(?P<Message>\w+)`, serveEcho)
+	router.Route("GET", `/echo/(?P<Message>\w*)`, serveEcho)
 
 	http.ListenAndServe(":4221", router)
 }

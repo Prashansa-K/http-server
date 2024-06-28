@@ -24,6 +24,4 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(s[2]))
 	}
-
-	// w.Write([]byte(OK_RESPONSE))
 }
