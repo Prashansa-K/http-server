@@ -17,6 +17,7 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "text/plain")
 		w.Header().Set("Content-Length", bodySize)
+		fmt.Println(">>", w.Header())
 
 		// headers should be set before WriteHeader and Write functions (unless we are sending 1xx codes)
 		// otherwise default ones would be sent
