@@ -25,6 +25,7 @@ func main() {
 	router.Route("GET", `/echo/(?P<Message>\w*)`, serveEcho)
 	router.Route("GET", `/user-agent`, serveUserAgent)
 	router.Route("GET", `/files/(?P<Message>\w+)`, serveFile)
+	router.Route("POST", `/files/(?P<Message>\w+)`, createFile)
 
 	http.ListenAndServe(":4221", router)
 }

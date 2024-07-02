@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -84,4 +85,43 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/octet-stream")
 
 	w.Write([]byte(fileContents))
+}
+
+func createFile(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+
+	s := strings.Split(path, "/")
+
+	var filename string
+
+	if len(s) > 1 && s[2] != "" {
+		filename = serverConfig.directory + s[2]
+	}
+
+	fmt.Println(filename)
+
+	fileContents, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("Error in reading request body: ", err.Error())
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return
+	}
+
+	f, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error in opening file: ", err.Error())
+		http.Error(w, "can't open file for writing", http.StatusBadRequest)
+		return
+	}
+
+	if _, err := f.Write(fileContents); err != nil {
+		fmt.Println("Error in writing to file: ", err.Error())
+		http.Error(w, "can't write file", http.StatusBadRequest)
+		return
+	}
+
+	w.Header()["Date"] = nil
+	w.Header()["Server"] = nil
+
+	w.WriteHeader(http.StatusCreated)
 }
