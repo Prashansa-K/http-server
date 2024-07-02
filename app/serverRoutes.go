@@ -28,3 +28,22 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(s[2]))
 	}
 }
+
+func serveUserAgent(w http.ResponseWriter, r *http.Request) {
+	headers := r.Header
+
+	var response string
+
+	userAgentHeaderKey := http.CanonicalHeaderKey("User-Agent")
+	fmt.Println(userAgentHeaderKey)
+
+	if headers[userAgentHeaderKey] != nil && len(headers[userAgentHeaderKey]) > 0 {
+		response = headers[userAgentHeaderKey][0]
+
+	} else {
+		response = "No user-agent header found"
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response))
+}

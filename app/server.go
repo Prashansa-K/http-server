@@ -15,6 +15,7 @@ func main() {
 	})
 
 	router.Route("GET", `/echo/(?P<Message>\w*)`, serveEcho)
+	router.Route("GET", `/user-agent`, serveUserAgent)
 
 	http.ListenAndServe(":4221", router)
 }
