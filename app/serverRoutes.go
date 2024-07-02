@@ -34,7 +34,6 @@ func serveUserAgent(w http.ResponseWriter, r *http.Request) {
 	var response string
 
 	userAgentHeaderKey := http.CanonicalHeaderKey("User-Agent")
-	fmt.Println(userAgentHeaderKey)
 
 	if headers[userAgentHeaderKey] != nil && len(headers[userAgentHeaderKey]) > 0 {
 		response = headers[userAgentHeaderKey][0]
