@@ -14,46 +14,59 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 	s := strings.Split(path, "/")
 
 	if len(s) > 1 && s[2] != "" {
-		bodySize := fmt.Sprintf("%d", len(s[2]))
+		encoding := setEncoding(w, r)
 
-		setEncoding(w, r)
+		var response []byte
 
-		w.Header().Set("Content-Type", "text/plain")
-		w.Header().Set("Content-Length", bodySize)
+		if encoding == GZIP {
+			response = compressWithGzip(s[2])
+		} else {
+			response = []byte(s[2])
+		}
 
 		removeDefaultHeaders(w)
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
 
 		// headers should be set before WriteHeader and Write functions (unless we are sending 1xx codes)
 		// otherwise default ones would be sent
 		// trailers can be added afterwards too
 		w.WriteHeader(http.StatusOK)
 
-		w.Write([]byte(s[2]))
+		w.Write(response)
 	}
 }
 
 func serveUserAgent(w http.ResponseWriter, r *http.Request) {
 	headers := r.Header
 
-	var response string
+	var userAgentValue string
+	var response []byte
 
 	userAgentHeaderKey := http.CanonicalHeaderKey("User-Agent")
 
+	removeDefaultHeaders(w)
+	encoding := setEncoding(w, r)
+
 	if headers[userAgentHeaderKey] != nil && len(headers[userAgentHeaderKey]) > 0 {
-		response = headers[userAgentHeaderKey][0]
+		userAgentValue = headers[userAgentHeaderKey][0]
 
 	} else {
-		response = "No user-agent header found"
+		userAgentValue = "No user-agent header found"
 	}
 
-	removeDefaultHeaders(w)
-	setEncoding(w, r)
+	if encoding == GZIP {
+		response = compressWithGzip(userAgentValue)
+	} else {
+		response = []byte(userAgentValue)
+	}
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
+	w.Write(response)
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +81,7 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	removeDefaultHeaders(w)
-	setEncoding(w, r)
+	encoding := setEncoding(w, r)
 
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
@@ -79,9 +92,18 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/octet-stream")
+	var response []byte
 
-	w.Write([]byte(fileContents))
+	if encoding == GZIP {
+		response = compressWithGzip(string(fileContents))
+	} else {
+		response = fileContents
+	}
+
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
+
+	w.Write(response)
 }
 
 func createFile(w http.ResponseWriter, r *http.Request) {

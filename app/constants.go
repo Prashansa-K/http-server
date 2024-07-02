@@ -2,6 +2,7 @@ package main
 
 const (
 	DEFAULT_DIR = "/tmp/"
+	GZIP        = "gzip"
 
 	CRLF     = "\r\n"
 	SPACE    = " "

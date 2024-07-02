@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"net/http"
 	"strings"
 )
@@ -10,7 +12,7 @@ func removeDefaultHeaders(w http.ResponseWriter) {
 	w.Header()["Server"] = nil
 }
 
-func setEncoding(w http.ResponseWriter, r *http.Request) {
+func setEncoding(w http.ResponseWriter, r *http.Request) string {
 	headers := r.Header
 
 	acceptEncodingHeaderKey := http.CanonicalHeaderKey("Accept-Encoding")
@@ -21,7 +23,7 @@ func setEncoding(w http.ResponseWriter, r *http.Request) {
 		clientSupportedEncoding = strings.Split(headers[acceptEncodingHeaderKey][0], ", ") // splitting by comma and space
 	} else {
 		// encoding not required
-		return
+		return ""
 	}
 
 	commonEncodingScheme := ""
@@ -38,8 +40,18 @@ func setEncoding(w http.ResponseWriter, r *http.Request) {
 	if commonEncodingScheme == "" {
 		// no common encoding found
 		// response won't be compressed
-		return
+		return ""
 	}
 
 	w.Header().Set("Content-Encoding", commonEncodingScheme)
+	return commonEncodingScheme
+}
+
+func compressWithGzip(content string) []byte {
+	var b bytes.Buffer
+	w := gzip.NewWriter(&b)
+	w.Write([]byte(content))
+	w.Close()
+
+	return b.Bytes()
 }
