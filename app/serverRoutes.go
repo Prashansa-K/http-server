@@ -10,7 +10,6 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	s := strings.Split(path, "/")
-	// fmt.Println(s)
 
 	if len(s) > 1 && s[2] != "" {
 		bodySize := fmt.Sprintf("%d", len(s[2]))
@@ -43,6 +42,12 @@ func serveUserAgent(w http.ResponseWriter, r *http.Request) {
 	} else {
 		response = "No user-agent header found"
 	}
+
+	w.Header()["Date"] = nil
+	w.Header()["Server"] = nil
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(response))
