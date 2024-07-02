@@ -41,6 +41,8 @@ func (rtr *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// No path matches
+	w.Header()["Date"] = nil
+	w.Header()["Server"] = nil
 	w.WriteHeader(http.StatusNotFound)
 }
 
