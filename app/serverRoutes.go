@@ -16,10 +16,12 @@ func serveEcho(w http.ResponseWriter, r *http.Request) {
 	if len(s) > 1 && s[2] != "" {
 		bodySize := fmt.Sprintf("%d", len(s[2]))
 
+		setEncoding(w, r)
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.Header().Set("Content-Length", bodySize)
-		w.Header()["Date"] = nil
-		w.Header()["Server"] = nil
+
+		removeDefaultHeaders(w)
 
 		// headers should be set before WriteHeader and Write functions (unless we are sending 1xx codes)
 		// otherwise default ones would be sent
@@ -44,8 +46,8 @@ func serveUserAgent(w http.ResponseWriter, r *http.Request) {
 		response = "No user-agent header found"
 	}
 
-	w.Header()["Date"] = nil
-	w.Header()["Server"] = nil
+	removeDefaultHeaders(w)
+	setEncoding(w, r)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
@@ -65,22 +67,17 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		filename = serverConfig.directory + s[2]
 	}
 
-	fmt.Println(filename)
+	removeDefaultHeaders(w)
+	setEncoding(w, r)
 
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
-		w.Header()["Date"] = nil
-		w.Header()["Server"] = nil
-
 		if os.IsNotExist(err) {
 			w.WriteHeader(http.StatusNotFound)
 		} else {
 			w.WriteHeader(http.StatusBadGateway)
 		}
 	}
-
-	w.Header()["Date"] = nil
-	w.Header()["Server"] = nil
 
 	w.Header().Set("Content-Type", "application/octet-stream")
 
@@ -97,6 +94,9 @@ func createFile(w http.ResponseWriter, r *http.Request) {
 	if len(s) > 1 && s[2] != "" {
 		filename = serverConfig.directory + s[2]
 	}
+
+	removeDefaultHeaders(w)
+	setEncoding(w, r)
 
 	fmt.Println(filename)
 
@@ -119,9 +119,6 @@ func createFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "can't write file", http.StatusBadRequest)
 		return
 	}
-
-	w.Header()["Date"] = nil
-	w.Header()["Server"] = nil
 
 	w.WriteHeader(http.StatusCreated)
 }

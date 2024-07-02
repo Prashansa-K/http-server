@@ -6,19 +6,22 @@ import (
 )
 
 var serverConfig struct {
-	directory string
+	directory         string
+	supportedEncoding []string
 }
 
 func main() {
 	flag.StringVar(&serverConfig.directory, "directory", DEFAULT_DIR, "directory to access")
 	flag.Parse()
 
+	serverConfig.supportedEncoding = append(serverConfig.supportedEncoding, "gzip")
+
 	router := &Router{}
 
 	router.Route("GET", "/", func(w http.ResponseWriter, r *http.Request) {
 		// Auto injection of Date and Server header would cause tests to fail with "anti-cheat failed" remark
-		w.Header()["Date"] = nil
-		w.Header()["Server"] = nil
+		removeDefaultHeaders(w)
+		setEncoding(w, r)
 		w.WriteHeader(http.StatusOK)
 	})
 
