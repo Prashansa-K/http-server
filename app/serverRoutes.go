@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -50,4 +51,37 @@ func serveUserAgent(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(response))
+}
+
+func serveFile(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+
+	s := strings.Split(path, "/")
+
+	var filename string
+
+	if len(s) > 1 && s[2] != "" {
+		filename = serverConfig.directory + s[2]
+	}
+
+	fmt.Println(filename)
+
+	fileContents, err := os.ReadFile(filename)
+	if err != nil {
+		w.Header()["Date"] = nil
+		w.Header()["Server"] = nil
+
+		if os.IsNotExist(err) {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusBadGateway)
+		}
+	}
+
+	w.Header()["Date"] = nil
+	w.Header()["Server"] = nil
+
+	w.Header().Set("Content-Type", "application/octet-stream")
+
+	w.Write([]byte(fileContents))
 }

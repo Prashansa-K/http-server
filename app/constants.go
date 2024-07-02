@@ -1,6 +1,8 @@
 package main
 
 const (
+	DEFAULT_DIR = "/tmp/"
+
 	CRLF     = "\r\n"
 	SPACE    = " "
 	PROTOCOL = "HTTP/1.1"
