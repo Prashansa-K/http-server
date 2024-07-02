@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 func removeDefaultHeaders(w http.ResponseWriter) {
 	w.Header()["Date"] = nil
@@ -15,7 +18,7 @@ func setEncoding(w http.ResponseWriter, r *http.Request) {
 	var clientSupportedEncoding []string
 
 	if headers[acceptEncodingHeaderKey] != nil && len(headers[acceptEncodingHeaderKey]) > 0 {
-		clientSupportedEncoding = headers[acceptEncodingHeaderKey]
+		clientSupportedEncoding = strings.Split(headers[acceptEncodingHeaderKey][0], ", ") // splitting by comma and space
 	} else {
 		// encoding not required
 		return
